@@ -109,7 +109,7 @@ format = '[[ $symbol $branch ](fg:green )]($style)'
 
 [git_status]
 format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style)"
-style = "fg:blue"
+style = "fg:yellow"
 conflicted = "​"
 untracked = "​"
 modified = "​"
@@ -186,14 +186,12 @@ format = '[[  $time ](fg:blue )]($style)'
 [line_break]
 disabled = false
 
-
 [cmd_duration]
 min_time = 50
 format = ' [$duration](bold yellow) '
 show_milliseconds = true
-min_time_to_notify = 500
+min_time_to_notify = 1500
 show_notifications = true
-
 
 [character]
 disabled = false
