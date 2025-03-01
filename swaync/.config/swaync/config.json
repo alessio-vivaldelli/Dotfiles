@@ -1,0 +1,87 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "cssPriority": "user",
+
+  "control-center-width": 380,
+  "control-center-height": 860, 
+  "control-center-margin-top": 2,
+  "control-center-margin-bottom": 2,
+  "control-center-margin-right": 1,
+  "control-center-margin-left": 0,
+
+  "notification-window-width": 400,
+  "notification-icon-size": 48,
+  "notification-body-image-height": 160,
+  "notification-body-image-width": 200,
+
+  "timeout": 6,
+  "timeout-low": 8,
+  "timeout-normal": 12,
+
+  "timeout-critical": -1,
+
+  "notification-2fa-action": true,
+  
+  "fit-to-screen": false,
+  "keyboard-shortcuts": true,
+  "image-visibility": "when-available",
+  "transition-time": 200,
+  "hide-on-clear": false,
+  "hide-on-action": false,
+  "script-fail-notify": true,
+
+  "scripts": {
+    "example-script": {
+      "exec": "echo 'Do something...'",
+      "urgency": "Normal"
+    },
+    "whathsapp-notification": {
+      "exec" : "bash -c 'echo \"$SWAYNC_DESKTOP_ENTRY\" > /home/alessio/github/dotfiles/swaync/.config/swaync/test.txt'",
+      "app-name": "Google Chrome"
+    }
+  },
+
+  "notification-visibility": {
+    "example-name": {
+      "state": "transient",
+      "urgency": "Normal",
+      "app-name": "Spotify"
+    }
+  },
+
+  "widgets": [
+    "label",
+    "buttons-grid",
+    "mpris",
+    "dnd",
+    "title",
+    "notifications"
+  ],
+
+  "widget-config": {
+    "dnd": {
+      "text": "Do not disturb"
+    },
+    "title": {
+      "text": "",
+      "clear-all-button": true,
+      "button-text": "  "
+    },
+    "label": {
+      "max-lines": 1,
+      "text": " "
+    },
+    "mpris": {
+      "image-size": 96,
+      "image-radius": 12
+    },
+    "buttons-grid": { 
+      "actions": [
+      
+      ]
+    }
+  }
+}
+

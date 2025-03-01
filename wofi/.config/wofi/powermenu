@@ -1,0 +1,11 @@
+hide_search=true
+no_actions=true
+orientation=horizontal
+content_halign=center
+dynamic_lines=true
+valign=center
+hide_scroll=true
+halign=fill
+width=1400
+height=300
+content_haling=fill

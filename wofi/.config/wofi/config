@@ -1,0 +1,6 @@
+allow_images=true
+mode=drun
+print_line_num=true
+columns=2
+image_size=32
+no_actions=true
