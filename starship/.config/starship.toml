@@ -99,7 +99,7 @@ format = '[ $user ]($style)'
 [directory]
 style = "bold fg:blue "
 format = "[ $path ]($style)"
-truncation_length = 0
+truncation_length = 3
 truncation_symbol = "…/"
 
 [git_branch]
