@@ -65,9 +65,9 @@ button:hover {
 #temperature,
 #backlight,
 #wireplumber,
-#tray,
 #network,
 #mode,
+#tray,
 #scratchpad {
   margin-top: 2px;
   margin-bottom: 2px;
@@ -75,6 +75,11 @@ button:hover {
   margin-right: 4px;
   padding-left: 4px;
   padding-right: 4px;
+}
+
+#tray {
+  color: @surface0;
+  border-bottom: 2px solid @white;
 }
 
 #clock {
