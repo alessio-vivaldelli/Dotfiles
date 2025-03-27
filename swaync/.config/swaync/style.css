@@ -285,6 +285,7 @@ slider {
 
 .widget-dnd {
   margin: 0px;
+  margin-left: 10rem;
   margin-bottom: 25px;
   font-size: 1.1rem;
 }

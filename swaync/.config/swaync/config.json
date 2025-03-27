@@ -1,7 +1,9 @@
 {
   "$schema": "/etc/xdg/swaync/configSchema.json",
-  "positionX": "right",
+  "positionX": "center",
   "positionY": "top",
+  "control-center-positionY": "top",
+  "control-center-positionX": "right",
   "cssPriority": "user",
   "control-center-width": 380,
   "control-center-height": 860,
@@ -17,6 +19,7 @@
   "timeout-low": 8,
   "timeout-critical": -1,
   "notification-2fa-action": true,
+  "notification-inline-replies": true,
   "fit-to-screen": false,
   "keyboard-shortcuts": true,
   "image-visibility": "when-available",
@@ -28,10 +31,6 @@
     "example-script": {
       "exec": "echo 'Do something...'",
       "urgency": "Normal"
-    },
-    "whathsapp-notification": {
-      "exec": "bash -c 'echo \"$SWAYNC_DESKTOP_ENTRY\" > /home/alessio/github/dotfiles/swaync/.config/swaync/test.txt'",
-      "app-name": "Google Chrome"
     }
   },
   "notification-visibility": {

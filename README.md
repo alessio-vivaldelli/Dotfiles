@@ -8,7 +8,7 @@
 
 ## Stow
 
-Use stow to link all configuration file into direcory.
+Use stow to link all configuration file into direcor.
 
 ```cmd
 stow --adopt -t $HOME kitty

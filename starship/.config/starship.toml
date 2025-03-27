@@ -187,11 +187,10 @@ format = '[[  $time ](fg:blue )]($style)'
 disabled = false
 
 [cmd_duration]
-min_time = 50
+min_time = 5
 format = ' [$duration](bold yellow) '
 show_milliseconds = true
 min_time_to_notify = 1500
-show_notifications = true
 
 [character]
 disabled = false
