@@ -184,6 +184,13 @@ return {
   -- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
   { import = "lazyvim.plugins.extras.lang.json" },
 
+  {
+    "jose-elias-alvarez/null-ls.nvim",
+    opts = function(_, opts)
+      local nls = require("null-ls")
+      table.insert(opts.sources, nls.builtins.formatting.google_java_format)
+    end,
+  },
   -- add any tools you want to have installed below
   {
     "williamboman/mason.nvim",
@@ -193,6 +200,10 @@ return {
         "shellcheck",
         "shfmt",
         "flake8",
+        "jdtls",
+        "java-debug-adapter",
+        "java-test",
+        "google-java-format",
       },
     },
   },

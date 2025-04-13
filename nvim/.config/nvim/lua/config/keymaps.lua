@@ -13,3 +13,13 @@ vim.keymap.set(
   ":NeovimProjectDiscover<CR>",
   { noremap = true, silent = true, desc = "Open Project discovery" }
 )
+
+vim.keymap.set("n", "<leader>tt", ":Telescope<CR>", { noremap = true, silent = true, desc = "Telescope" })
+-- Database
+D = {
+  name = "Database",
+  u = { "<Cmd>DBUIToggle<Cr>", "Toggle UI" },
+  f = { "<Cmd>DBUIFindBuffer<Cr>", "Find buffer" },
+  r = { "<Cmd>DBUIRenameBuffer<Cr>", "Rename buffer" },
+  q = { "<Cmd>DBUILastQueryInfo<Cr>", "Last query info" },
+}
