@@ -3,7 +3,7 @@
 $bg: #212223;
 $fg: #f1f1f1;
 $accent: #378DF7;
-$radius: 7px;
+$radius: 150px;
 
 window.Bar {
   border: none;
@@ -12,6 +12,7 @@ window.Bar {
   color: $fg;
   font-size: 1.1em;
   font-weight: bold;
+  border-radius: $radius
 
   label {
     margin: 0 8px;
@@ -21,6 +22,7 @@ window.Bar {
     button {
       all: unset;
       background-color: transparent;
+      border-radius: $radius;
 
       &:hover label {
         background-color: color.adjust($fg, $alpha: -0.84);
@@ -43,6 +45,7 @@ window.Bar {
     .focused label {
       color: $accent;
       border-color: $accent;
+      border-radius: $radius;
     }
   }
 
@@ -51,11 +54,13 @@ window.Bar {
 
     button {
       padding: 0 4px;
+      border-radius: $radius;
     }
   }
 
   .FocusedClient {
     color: $accent;
+    border-radius: $radius;
   }
 
   .Media .Cover {
@@ -69,6 +74,7 @@ window.Bar {
   .Battery label {
     padding-left: 0;
     margin-left: 0;
+    border-radius: $radius;
   }
 
   .AudioSlider {
@@ -109,7 +115,7 @@ window.Bar {
 
 //   background-color: $accent;
   
-//   .TimerButtons{
+//   .Timer{
 //     background-color: yellow;
 //   }
 //   .stop{

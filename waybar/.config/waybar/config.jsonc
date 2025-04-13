@@ -8,6 +8,7 @@
   // "modules-left": ["hyprland/workspaces", "custom/playerctl", "custom/previous", "custom/pause", "custom/next"],
   // "modules-center": ["hyprland/window"],
   "modules-left": [
+    "custom/timer",
     "custom/playerctl",
     "custom/previous",
     "custom/pause",
@@ -36,6 +37,13 @@
     "spacing": 10,
     "show-passive-items": true,
     "reverse-direction": true
+  },
+  "custom/timer": {
+    "format": " 󰔛 ",
+    "tooltip": false,
+    "return-type": "json",
+    // "exec": "sh /home/alessio/github/dotfiles/apps/ags_test/script.sh info",
+    "on-click": "sh /home/alessio/github/dotfiles/apps/ags_test/script.sh toggle"
   },
   "custom/playerctl": {
     "format": "{}",

@@ -164,17 +164,36 @@ class Header(Gtk.Box):
 
 
 
-class TimerApp(Gtk.Window):
+class TimerApp(Astal.Window):
     def __init__(self, monitor: Gdk.Monitor):
-        super().__init__()
+        super().__init__(
+            anchor=Astal.WindowAnchor.LEFT
+            | Astal.WindowAnchor.TOP,
+            gdkmonitor=monitor,
+            margin_left=5,
+            margin_top=30,
+            exclusivity=Astal.Exclusivity.IGNORE,
+            layer=Astal.Layer.TOP,
+            keymode=Astal.Keymode.EXCLUSIVE,
+        )
+
+        # Astal.widget_set_class_names(self, ["Timer"])
+
+
+        Astal.widget_set_css(self, "border-radius: 12; border: 0.5px solid #414559;")
+    
+        # super().__init__()
         self.connect("destroy", self.on_close)
         self.set_title("Timer")
         # self.set_default_size(300, 400)
-        self.set_decorated(False)
-        self.set_transient_for(None)
-        self.set_type_hint(Gdk.WindowTypeHint.UTILITY) # UTILITY
-        self.move(0, 0)
-        self.set_resizable(False)
+
+        # self.set_decorated(False)
+        # self.set_transient_for(None)
+        # self.set_type_hint(Gdk.WindowTypeHint.UTILITY) # UTILITY
+        # self.move(0, 0)
+        # self.set_resizable(False)
+
+
 
         timer_state = TimerState()
 
@@ -202,7 +221,12 @@ class TimerApp(Gtk.Window):
 
 
         self.connect("scroll-event", self.on_scroll)
+        # self.connect("button-press-event", self.on_click_outside)
 
+    def on_click_outside(self, widget, event):
+        print("heko wjn")
+        Gtk.main_quit()
+        exit(0)
     def on_scroll(self, widget, event):
         c = self.chrono_widget.time.get_children()
         for i in c:
