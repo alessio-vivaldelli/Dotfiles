@@ -10,7 +10,11 @@ return {
         settings = nil, -- specify the settings file or use the default settings
         commands = { -- add custom goals to the command list
           { cmd = { "clean", "compile" }, desc = "clean then compile" },
-          { cmd = { "javafx:run" }, desc = "run javafx application" },
+          { cmd = { "javafx:run" }, desc = "run javafx application, full log" },
+          {
+            cmd = { "exec:java", "-Dexec.mainClass=it.petrinet.petrinet.builder.BuilderTest", "-e" },
+            desc = "run custom class",
+          },
         },
       })
     end,

@@ -1,30 +1,20 @@
+# Organized imports
 import time
 import math
 import gi
 gi.require_version('GSound', '1.0')
 gi.require_version('Notify', '0.7')
 from gi.repository import (
-    AstalIO,
-    Astal,
-    Gtk,
-    Gdk,
-    GSound,
-    Notify,
-    GLib,
-    GObject,
-    AstalBattery as Battery,
-    AstalWp as Wp,
-    AstalNetwork as Network,
-    AstalTray as Tray,
-    AstalMpris as Mpris,
-    AstalHyprland as Hyprland,
+    AstalIO, Astal, Gtk, Gdk, GSound, Notify, GLib, GObject,
+    AstalBattery as Battery, AstalWp as Wp, AstalNetwork as Network,
+    AstalTray as Tray, AstalMpris as Mpris, AstalHyprland as Hyprland,
 )
 from threading import Thread
 
-
 Notify.init("Chrono App")
 
-class ChronoStruct():
+# ChronoStruct class to manage chrono state
+class ChronoStruct:
     def __init__(self):
         self.is_running = True
         self.is_paused = True
@@ -41,8 +31,7 @@ class ChronoStruct():
     def set_timer_seconds(self, seconds):
         self.second = seconds
 
-
-
+# Chrono main widget
 class Chrono(Gtk.Box):
     def __init__(self, parent):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -96,7 +85,7 @@ class Chrono(Gtk.Box):
     def on_stop(self, button):
         self.time.stop_timer()
 
-    def send_notification(self, title, message, icon = None):
+    def send_notification(self, title, message, icon=None):
         if self.notification:
             self.notification.close()
 
@@ -118,7 +107,7 @@ class Chrono(Gtk.Box):
 
         self.notification.close()
 
-
+# ChronoInputContainers for input fields
 class ChronoInputContainers(Gtk.Box):
     __gsignals__ = {
         'timer-finish': (GObject.SIGNAL_RUN_FIRST, None, ())
@@ -146,7 +135,7 @@ class ChronoInputContainers(Gtk.Box):
         self.add(Gtk.Label(":"))
         self.add(self.seconds)
 
-        # Connetti i segnali personalizzati
+        # Connect custom signals
         self.seconds.connect("value-changed", self.on_value_changed)
         self.minutes.connect("value-changed", self.on_value_changed)
         self.hours.connect("value-changed", self.on_value_changed)
@@ -203,19 +192,7 @@ class ChronoInputContainers(Gtk.Box):
         self.on_value_changed(None)
         return True
 
-#
-# class ChronoDefaultBottons(Gtk.Botton):
-#     def __init__(self, timer_state: ChronoStruct, parent):
-#         super().__init__()
-#         self.set_halign(Gtk.Align.CENTER)
-#         self.set_margin_top(10)
-#         self.set_margin_bottom(10)
-#         self.set_margin_start(0)
-#         self.set_margin_end(0)
-#
-#         self.set_label("20")
-
-
+# ChronoInput for individual time fields
 class ChronoInput(Gtk.Button):
     __gsignals__ = {
         'value-changed': (GObject.SIGNAL_RUN_FIRST, None, ())
@@ -251,14 +228,13 @@ class ChronoInput(Gtk.Button):
         self.connect("leave-notify-event", self.on_mouse_exit)
         self.connect("clicked", self.on_click)
 
-
     def on_click(self, widget):
         self.value = 0
         self.set_value()
             
         self.emit("value-changed")
 
-    def increment_value(self, power = 1, amoun = None):
+    def increment_value(self, power=1, amoun=None):
         if amoun != None:
             self.value += amoun
         else:
@@ -287,6 +263,7 @@ class ChronoInput(Gtk.Button):
     def on_mouse_exit(self, widget, event):
         self.parent.grab_focus()
 
+# ChronoButtons for Start/Stop buttons
 class ChronoButtons(Gtk.Box):
     __gsignals__ = {
         'start': (GObject.SIGNAL_RUN_FIRST, None, ()),

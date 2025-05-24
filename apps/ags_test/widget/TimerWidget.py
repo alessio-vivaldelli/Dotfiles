@@ -1,22 +1,15 @@
+# Organized imports
 import time
 import math
 from gi.repository import (
-    AstalIO,
-    Astal,
-    Gtk,
-    Gdk,
-    GLib,
-    GObject,
-    AstalBattery as Battery,
-    AstalWp as Wp,
-    AstalNetwork as Network,
-    AstalTray as Tray,
-    AstalMpris as Mpris,
-    AstalHyprland as Hyprland,
+    AstalIO, Astal, Gtk, Gdk, GLib, GObject,
+    AstalBattery as Battery, AstalWp as Wp, AstalNetwork as Network,
+    AstalTray as Tray, AstalMpris as Mpris, AstalHyprland as Hyprland,
 )
 from threading import Thread
 from widget.ChronoWidget import *
 
+# TimerState class to manage timer state
 class TimerState:
     def __init__(self):
         self.is_running = True
@@ -30,6 +23,7 @@ class TimerState:
         self.is_running = False
         self.is_paused = True
 
+# TimerButtons class for Start/Stop buttons
 class TimerButtons(Gtk.Box):
     def __init__(self, timer_state):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -62,6 +56,7 @@ class TimerButtons(Gtk.Box):
         self.timer_state.stop()
         self.button_start.set_label("")
 
+# TimerCircular class for circular progress
 class TimerCircular(Astal.CircularProgress):
     def __init__(self, timer_state):
         super().__init__()
@@ -102,6 +97,7 @@ class TimerCircular(Astal.CircularProgress):
         self.val = (self.val + self.gain) % 1.0
         return True
 
+# OverlayBox class for timer display
 class OverlayBox(Gtk.Box):
     def __init__(self, timer_state):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -128,6 +124,7 @@ class OverlayBox(Gtk.Box):
 
         return True
 
+# TimerCircularOverlay combines circular progress and overlay box
 class TimerCircularOverlay(Gtk.Overlay):
     def __init__(self, timer_state):
         super().__init__()
@@ -138,7 +135,7 @@ class TimerCircularOverlay(Gtk.Overlay):
         self.overlay_box.set_valign(Gtk.Align.CENTER)
         self.add_overlay(self.overlay_box)
 
-
+# TimerContainer combines buttons and circular overlay
 class TimerContainer(Gtk.Box):
     def __init__(self, timer_state):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
@@ -148,6 +145,7 @@ class TimerContainer(Gtk.Box):
         self.add(self.timer_circular)
         self.add(self.timer_buttons)
 
+# Header for navigation
 class Header(Gtk.Box):
     def __init__(self, stack):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -161,14 +159,11 @@ class Header(Gtk.Box):
         self.stack_switcher.set_stack(stack)
         self.add(self.stack_switcher)
 
-
-
-
+# TimerApp main application window
 class TimerApp(Astal.Window):
     def __init__(self, monitor: Gdk.Monitor):
         super().__init__(
-            anchor=Astal.WindowAnchor.LEFT
-            | Astal.WindowAnchor.TOP,
+            anchor=Astal.WindowAnchor.LEFT | Astal.WindowAnchor.TOP,
             gdkmonitor=monitor,
             margin_left=5,
             margin_top=30,
@@ -177,23 +172,9 @@ class TimerApp(Astal.Window):
             keymode=Astal.Keymode.EXCLUSIVE,
         )
 
-        # Astal.widget_set_class_names(self, ["Timer"])
-
-
         Astal.widget_set_css(self, "border-radius: 12; border: 0.5px solid #414559;")
-    
-        # super().__init__()
         self.connect("destroy", self.on_close)
         self.set_title("Timer")
-        # self.set_default_size(300, 400)
-
-        # self.set_decorated(False)
-        # self.set_transient_for(None)
-        # self.set_type_hint(Gdk.WindowTypeHint.UTILITY) # UTILITY
-        # self.move(0, 0)
-        # self.set_resizable(False)
-
-
 
         timer_state = TimerState()
 
@@ -203,12 +184,10 @@ class TimerApp(Astal.Window):
         Astal.widget_set_css(self.stack, "font-size: 20; font-weight: bold")
 
         timer_container = TimerContainer(timer_state)
-        # Placeholder for another widget (e.g., Timer)
         self.chrono_widget = Chrono(self)
         self.chrono_widget.add_events(Gdk.EventMask.SCROLL_MASK)
         self.stack.add_titled(timer_container, "timer", "󰔛")
         self.stack.add_titled(self.chrono_widget, "another", "󰚭")
-        
 
         header = Header(self.stack)
 
@@ -219,14 +198,12 @@ class TimerApp(Astal.Window):
         self.add(vbox)
         self.show_all()
 
-
         self.connect("scroll-event", self.on_scroll)
-        # self.connect("button-press-event", self.on_click_outside)
 
     def on_click_outside(self, widget, event):
-        print("heko wjn")
         Gtk.main_quit()
         exit(0)
+
     def on_scroll(self, widget, event):
         c = self.chrono_widget.time.get_children()
         for i in c:
