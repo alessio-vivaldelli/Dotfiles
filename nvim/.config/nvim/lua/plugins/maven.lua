@@ -12,7 +12,7 @@ return {
           { cmd = { "clean", "compile" }, desc = "clean then compile" },
           { cmd = { "javafx:run" }, desc = "run javafx application, full log" },
           {
-            cmd = { "exec:java", "-Dexec.mainClass=it.petrinet.petrinet.builder.BuilderTest", "-e" },
+            cmd = { "exec:java", "-Dexec.mainClass=it.petrinet.model.TestingApplication", "-e" },
             desc = "run custom class",
           },
         },
