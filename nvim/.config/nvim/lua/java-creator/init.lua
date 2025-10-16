@@ -1,7 +1,7 @@
 -- lua/java-creator/init.lua
 local M = {}
 
--- Configurazione di default
+-- Default configuration
 M.config = {
   templates = {
     class = [[package %s;
@@ -49,7 +49,8 @@ public abstract class %s {
 
   options = {
     auto_open = true,
-    use_notify = true,
+    use_notify = true, -- Set to false to disable all notifications from this plugin
+    notification_timeout = 3000, -- Timeout for notifications in milliseconds
     java_version = 17,
     src_patterns = { "src/main/java", "src/test/java", "src" },
     project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
@@ -60,37 +61,70 @@ public abstract class %s {
 
 local utils = {}
 
+---
+--- Sends a notification to the user if enabled in the config.
+--- Uses 'nvim-notify' if available, otherwise falls back to vim.notify.
+---
+---@param msg string The message to display.
+---@param level vim.log.levels The notification level (e.g., INFO, ERROR).
 function utils.notify(msg, level)
-  level = level or vim.log.levels.INFO
-  if M.config.options.use_notify then
-    local ok, notify = pcall(require, "notify")
-    if ok then
-      notify(msg, level, { title = "Java Creator" })
-      return
-    end
+  if not M.config.options.use_notify then
+    return -- Do nothing if notifications are disabled
   end
-  vim.notify(msg, level)
+
+  level = level or vim.log.levels.INFO
+
+  local ok, notify_lib = pcall(require, "notify")
+  if ok then
+    -- Use 'nvim-notify' if available
+    notify_lib(msg, level, {
+      title = "Java Creator",
+      timeout = M.config.options.notification_timeout,
+    })
+  else
+    -- Fallback to the standard vim.notify
+    vim.notify(msg, { title = "Java Creator", level = level })
+  end
 end
 
+---
+--- Displays an error message.
+---
+---@param msg string The error message.
 function utils.error(msg)
   utils.notify(msg, vim.log.levels.ERROR)
 end
+
+---
+--- Displays an informational message.
+---
+---@param msg string The info message.
 function utils.info(msg)
   utils.notify(msg, vim.log.levels.INFO)
 end
+
+---
+--- Displays a warning message.
+---
+---@param msg string The warning message.
 function utils.warn(msg)
   utils.notify(msg, vim.log.levels.WARN)
 end
 
+---
+--- Validates if a string is a valid Java identifier and not a keyword.
+---
+---@param name string The identifier to validate.
+---@return boolean, string|nil True if valid, false and an error message otherwise.
 function utils.validate_java_name(name)
   if not name or name == "" then
-    return false, "Il nome non può essere vuoto"
+    return false, "Name cannot be empty"
   end
   if not name:match("^[a-zA-Z_]") then
-    return false, "Il nome deve iniziare con una lettera o underscore"
+    return false, "Name must start with a letter or underscore"
   end
   if not name:match("^[a-zA-Z0-9_]*$") then
-    return false, "Il nome può contenere solo lettere, numeri e underscore"
+    return false, "Name can only contain letters, numbers, and underscores"
   end
 
   local java_keywords = {
@@ -151,26 +185,37 @@ function utils.validate_java_name(name)
 
   for _, keyword in ipairs(java_keywords) do
     if name:lower() == keyword then
-      return false, "Il nome non può essere una keyword Java: " .. keyword
+      return false, "Name cannot be a Java keyword: " .. keyword
     end
   end
 
   return true
 end
 
+---
+--- Validates a Java package name.
+---
+---@param package string The package name to validate.
+---@return boolean, string|nil True if valid, false and an error message otherwise.
 function utils.validate_package_name(package)
-  if not package or package == "" then
-    return true
+  if package == "" or package == nil then
+    return true -- Default package is valid
   end
+
   for part in package:gmatch("[^%.]+") do
     local valid, err = utils.validate_java_name(part)
     if not valid then
-      return false, "Package non valido: " .. err
+      return false, "Invalid package: " .. err
     end
   end
   return true
 end
 
+---
+--- Finds the Java project root directory by searching for marker files.
+---
+---@param start_dir string|nil The directory to start searching from. Defaults to current working directory.
+---@return string|nil The project root path or nil if not found.
 function utils.find_java_project_root(start_dir)
   start_dir = start_dir or vim.fn.getcwd()
   local current_dir = start_dir
@@ -191,6 +236,11 @@ function utils.find_java_project_root(start_dir)
   return nil
 end
 
+---
+--- Finds the primary source directory (e.g., 'src/main/java') within a project.
+---
+---@param project_root string The project root path.
+---@return string|nil The source directory path or nil if not found.
 function utils.find_java_src_dir(project_root)
   if not project_root then
     return nil
@@ -203,12 +253,7 @@ function utils.find_java_src_dir(project_root)
     end
   end
 
-  local nested_paths = {
-    "",
-    "backend",
-    "src",
-    "src/main/java",
-  }
+  local nested_paths = { "", "backend", "src", "src/main/java" }
 
   for _, nested_path in ipairs(nested_paths) do
     local base_path = project_root
@@ -227,6 +272,10 @@ function utils.find_java_src_dir(project_root)
   return nil
 end
 
+---
+--- Gets the base source directory for packages.
+---
+---@return string|nil The base package path or nil if not found.
 function utils.get_package_base()
   local project_root = utils.find_java_project_root()
   if not project_root then
@@ -235,6 +284,11 @@ function utils.get_package_base()
   return utils.find_java_src_dir(project_root)
 end
 
+---
+--- Extracts the last part of a dot-separated package string.
+---
+---@param input string The full package string.
+---@return string The last fragment of the package.
 function utils.get_current_package_fragment(input)
   if not input or input == "" then
     return ""
@@ -242,6 +296,12 @@ function utils.get_current_package_fragment(input)
   return input:match("([^.]+)$") or ""
 end
 
+---
+--- Finds package names matching a given fragment.
+---
+---@param base string The base source directory.
+---@param fragment string The package fragment to search for.
+---@return table A list of matching package names.
 function utils.get_package_matches(base, fragment)
   local matches = {}
   if not base or not fragment then
@@ -265,6 +325,10 @@ function utils.get_package_matches(base, fragment)
   return matches
 end
 
+---
+--- Finds all available packages within the source directory.
+---
+---@return table A sorted list of all found package names.
 function utils.find_available_packages()
   local src_dir = utils.get_package_base()
   if not src_dir then
@@ -279,19 +343,22 @@ function utils.find_available_packages()
       local relative = dir:sub(#src_dir + 2, -2)
       if relative ~= "" then
         local package_name = relative:gsub("/", ".")
-        -- Includi tutte le cartelle nella gerarchia dei package
         table.insert(packages, package_name)
       end
     end
   end
 
   table.sort(packages, function(a, b)
-    return #a < #b -- Ordina per lunghezza crescente
+    return #a < #b -- Sort by increasing length
   end)
 
   return packages
 end
 
+---
+--- Tries to determine the default package based on the current directory or open files.
+---
+---@return string The determined default package name.
 function utils.find_default_package()
   local src_dir = utils.get_package_base()
   if not src_dir then
@@ -316,6 +383,11 @@ function utils.find_default_package()
   return ""
 end
 
+---
+--- Extracts the package declaration from a Java file.
+---
+---@param file string The path to the Java file.
+---@return string|nil The package name or nil if not found.
 function utils.extract_package_from_file(file)
   local content = utils.read_file(file)
   if content then
@@ -325,6 +397,11 @@ function utils.extract_package_from_file(file)
   return nil
 end
 
+---
+--- Reads the entire content of a file.
+---
+---@param file string The path to the file.
+---@return string|nil The file content or nil on failure.
 function utils.read_file(file)
   local f = io.open(file, "r")
   if not f then
@@ -335,6 +412,13 @@ function utils.read_file(file)
   return content
 end
 
+---
+--- Generates the full file path for a new Java file.
+---
+---@param package string The package name.
+---@param name string The class/interface/enum name.
+---@param java_type string The type of Java file (e.g., 'class').
+---@return string The generated file path.
 function utils.generate_file_path(package, name, java_type)
   local src_dir = utils.get_package_base() or vim.fn.getcwd()
 
@@ -348,12 +432,23 @@ function utils.generate_file_path(package, name, java_type)
   end
 end
 
+---
+--- Generates the content for a new Java file from a template.
+---
+---@param java_type string The type of Java file.
+---@param package string The package name.
+---@param name string The class/interface/enum name.
+---@return string|nil, string|nil The file content, or nil and an error message.
 function utils.generate_file_content(java_type, package, name)
   local template = M.config.templates[java_type]
   if not template then
-    return nil, "Template non trovato per tipo: " .. java_type
+    return nil, "Template not found for type: " .. java_type
   end
 
+  -- Generate base content without package first
+  local base_content = string.format(template, "", name):gsub("package ;\n\n", "")
+
+  -- Add default imports
   local imports = M.config.default_imports[java_type] or {}
   local import_lines = ""
   if #imports > 0 then
@@ -363,8 +458,13 @@ function utils.generate_file_content(java_type, package, name)
     import_lines = import_lines .. "\n"
   end
 
-  local package_line = package and package ~= "" and string.format("package %s;\n\n", package) or ""
+  -- Build the package line (only if specified)
+  local package_line = ""
+  if package and package ~= "" then
+    package_line = "package " .. package .. ";\n\n"
+  end
 
+  -- Handle record template separately for proper formatting
   if java_type == "record" then
     return string.format(
       [[%s%spublic record %s() {
@@ -376,11 +476,16 @@ function utils.generate_file_content(java_type, package, name)
     )
   end
 
-  return package_line .. import_lines .. string.format(template, package or "", name):gsub("package ;\n\n", "")
+  -- Combine all parts
+  return package_line .. import_lines .. base_content
 end
 
 local input = {}
 
+---
+--- Prompts the user to select a Java type.
+---
+---@param callback function The function to call with the selected type.
 function input.get_java_type(callback)
   local types = { "class", "interface", "enum", "record", "abstract_class" }
   local type_labels = {
@@ -392,13 +497,19 @@ function input.get_java_type(callback)
   }
 
   vim.ui.select(types, {
-    prompt = "Seleziona tipo Java:",
+    prompt = "Select Java type:",
     format_item = function(item)
       return type_labels[item] or item
     end,
   }, callback)
 end
 
+---
+--- Prompts the user for a string input.
+---
+---@param prompt string The prompt message.
+---@param default string|nil The default value.
+---@param callback function The function to call with the user's input.
 function input.get_string(prompt, default, callback)
   vim.ui.input({
     prompt = prompt,
@@ -406,6 +517,13 @@ function input.get_string(prompt, default, callback)
   }, callback)
 end
 
+---
+--- Prompts for package input with completion.
+---
+---@param prompt string The prompt message.
+---@param default string The default value.
+---@param callback function The callback function.
+---@param src_dir string The source directory for completion.
 function input.get_package_input(prompt, default, callback, src_dir)
   vim.ui.input({
     prompt = prompt,
@@ -423,38 +541,40 @@ function input.get_package_input(prompt, default, callback, src_dir)
   }, callback)
 end
 
+---
+--- Prompts the user to select or create a package.
+---
+---@param prompt string The prompt message.
+---@param default string The default package.
+---@param callback function The function to call with the selected package.
 function input.get_package(prompt, default, callback)
   local src_dir = utils.get_package_base()
   local available_packages = utils.find_available_packages()
 
-  -- Menu principale
-  vim.ui.select({ "(nuovo package)", unpack(available_packages) }, {
+  vim.ui.select({ "(new package)", unpack(available_packages) }, {
     prompt = prompt,
     default = default,
     format_item = function(item)
-      return item == "(nuovo package)" and "✏️ " .. item or "📦 " .. item
+      return item == "(new package)" and "✏️ " .. item or "📦 " .. item
     end,
   }, function(choice)
-    -- Gestione ESC nel menu principale
     if not choice then
-      return callback(nil) -- Annulla tutto
+      return callback(nil) -- Cancel operation
     end
 
-    if choice == "(nuovo package)" then
-      -- Input modificabile con completamento
+    if choice == "(new package)" then
       vim.ui.select(available_packages, {
-        prompt = "Scegli base package:",
+        prompt = "Select base package:",
         format_item = function(pkg)
           return "✏️ " .. pkg
         end,
       }, function(selected_pkg)
-        -- Gestione ESC nel secondo menu
         if not selected_pkg then
-          return callback(nil) -- Annulla tutto
+          return callback(nil) -- Cancel operation
         end
 
         vim.ui.input({
-          prompt = "Nuovo package: ",
+          prompt = "New package: ",
           default = selected_pkg or "",
           completion = function(arg_lead)
             local matches = {}
@@ -466,9 +586,8 @@ function input.get_package(prompt, default, callback)
             return matches
           end,
         }, function(input_text)
-          -- Gestione ESC nell'input finale
           if not input_text then
-            return callback(nil) -- Annulla tutto
+            return callback(nil) -- Cancel operation
           end
           callback(input_text)
         end)
@@ -479,6 +598,12 @@ function input.get_package(prompt, default, callback)
   end)
 end
 
+---
+--- Provides completion for package names.
+--- Used for command-line completion.
+---
+---@param arg_lead string The leading part of the argument.
+---@return table A list of matching package names.
 function M.complete_packages(arg_lead, cmd_line, cursor_pos)
   local src_dir = utils.get_package_base()
   if not src_dir then
@@ -488,39 +613,45 @@ function M.complete_packages(arg_lead, cmd_line, cursor_pos)
   return utils.get_package_matches(src_dir, fragment)
 end
 
+---
+--- Creates the Java file after validating inputs.
+---
+---@param java_type string The type of Java file.
+---@param name string The class/interface/enum name.
+---@param package string The package name.
 function M.create_java_file(java_type, name, package)
   if java_type == "record" and M.config.options.java_version < 14 then
-    utils.error("I Record richiedono Java 14 o superiore. Versione corrente: " .. M.config.options.java_version)
+    utils.error("Records require Java 14 or higher. Current version: " .. M.config.options.java_version)
     return
   end
 
   local valid, err = utils.validate_java_name(name)
   if not valid then
-    utils.error("Nome non valido: " .. err)
+    utils.error("Invalid name: " .. err)
     return
   end
 
   valid, err = utils.validate_package_name(package)
   if not valid then
-    utils.error("Package non valido: " .. err)
+    utils.error("Invalid package: " .. err)
     return
   end
 
   local file_path = utils.generate_file_path(package, name, java_type)
   if vim.fn.filereadable(file_path) == 1 then
-    utils.error("Il file esiste già: " .. file_path)
+    utils.error("File already exists: " .. file_path)
     return
   end
 
   local content, err_msg = utils.generate_file_content(java_type, package, name)
   if not content then
-    utils.error("Errore generazione contenuto: " .. err_msg)
+    utils.error("Error generating content: " .. err_msg)
     return
   end
 
   local file = io.open(file_path, "w")
   if not file then
-    utils.error("Impossibile creare il file: " .. file_path)
+    utils.error("Could not create file: " .. file_path)
     return
   end
 
@@ -531,65 +662,98 @@ function M.create_java_file(java_type, name, package)
     vim.cmd("edit " .. file_path)
   end
 
-  utils.info(string.format("Creato %s: %s", java_type, file_path))
+  utils.info(string.format("Created %s: %s", java_type, file_path))
 end
 
+---
+--- Main interactive function to create a new Java file.
+--- It guides the user through selecting type, name, and package.
+---
 function M.java_new()
   input.get_java_type(function(java_type)
     if not java_type then
+      utils.info("Java file creation canceled.")
       return
     end
 
-    input.get_string("Nome " .. java_type .. ": ", "", function(name)
-      if not name or name == "" then
-        utils.error("Nome richiesto")
+    input.get_string("Name for " .. java_type .. ": ", "", function(name)
+      if not name then
+        utils.info("Java file creation canceled.")
+        return
+      end
+      if name == "" then
+        utils.error("Name is required.")
         return
       end
 
       local default_package = utils.find_default_package()
       input.get_package("Package: ", default_package, function(package)
+        if not package then
+          utils.info("Java file creation canceled.")
+          return
+        end
         M.create_java_file(java_type, name, package)
       end)
     end)
   end)
 end
 
+---
+--- Creates a specific Java type directly, asking only for name and package.
+---
+---@param java_type string The type of file to create (e.g., 'class').
 function M.create_java_type_direct(java_type)
-  input.get_string("Nome " .. java_type .. ": ", "", function(name)
+  input.get_string("Name for " .. java_type .. ": ", "", function(name)
     if not name or name == "" then
-      utils.error("Nome richiesto")
+      utils.error("Name is required.")
       return
     end
 
     local default_package = utils.find_default_package()
     input.get_package("Package: ", default_package, function(package)
+      if not package then
+        utils.info("Java file creation canceled.")
+        return
+      end
       M.create_java_file(java_type, name, package)
     end)
   end)
 end
 
+--- Shortcut function to create a Java class.
 function M.java_class()
   M.create_java_type_direct("class")
 end
+
+--- Shortcut function to create a Java interface.
 function M.java_interface()
   M.create_java_type_direct("interface")
 end
+
+--- Shortcut function to create a Java enum.
 function M.java_enum()
   M.create_java_type_direct("enum")
 end
+
+--- Shortcut function to create a Java record.
 function M.java_record()
   M.create_java_type_direct("record")
 end
 
+---
+--- Sets up the plugin, commands, and keymaps.
+--- This is the main entry point for the user's configuration.
+---
+---@param opts table|nil User-provided configuration to override defaults.
 function M.setup(opts)
   opts = opts or {}
   M.config = vim.tbl_deep_extend("force", M.config, opts)
 
-  vim.api.nvim_create_user_command("JavaNew", M.java_new, { desc = "Crea nuovo file Java interattivo" })
-  vim.api.nvim_create_user_command("JavaClass", M.java_class, { desc = "Crea nuova classe Java" })
-  vim.api.nvim_create_user_command("JavaInterface", M.java_interface, { desc = "Crea nuova interfaccia Java" })
-  vim.api.nvim_create_user_command("JavaEnum", M.java_enum, { desc = "Crea nuovo enum Java" })
-  vim.api.nvim_create_user_command("JavaRecord", M.java_record, { desc = "Crea nuovo record Java" })
+  vim.api.nvim_create_user_command("JavaNew", M.java_new, { desc = "Create a new Java file interactively" })
+  vim.api.nvim_create_user_command("JavaClass", M.java_class, { desc = "Create a new Java class" })
+  vim.api.nvim_create_user_command("JavaInterface", M.java_interface, { desc = "Create a new Java interface" })
+  vim.api.nvim_create_user_command("JavaEnum", M.java_enum, { desc = "Create a new Java enum" })
+  vim.api.nvim_create_user_command("JavaRecord", M.java_record, { desc = "Create a new Java record" })
 
   if M.config.keymaps then
     local command_map = {
@@ -609,7 +773,7 @@ function M.setup(opts)
     end
   end
 
-  utils.info("Java Creator plugin caricato")
+  utils.info("Java Creator plugin loaded")
 end
 
 return M

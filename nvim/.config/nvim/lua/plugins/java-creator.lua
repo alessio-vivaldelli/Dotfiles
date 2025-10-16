@@ -1,18 +1,17 @@
--- ~/.config/nvim/lua/plugins/java-creator.lua
 return {
   {
-    dir = vim.fn.stdpath("config") .. "/lua/java-creator",
-    name = "java-creator",
+    "alessio-vivaldelli/java-creator-nvim",
     config = function()
       require("java-creator").setup({
         options = {
           java_version = 17,
           auto_open = true,
           use_notify = true,
-          custom_src_path = "backend/src/main/java", -- Specifica il tuo percorso custom
+          custom_src_path = "backend/src/main/java",
           src_patterns = { "src/main/java", "src/test/java", "src" },
           project_markers = { "pom.xml", "build.gradle", "settings.gradle", ".project", "backend" },
-          package_selection_style = "hybrid", -- "auto", "menu" o "hybrid"
+          package_selection_style = "hybrid",
+          notification_timeout = 3000,
         },
         keymaps = {
           java_new = "<leader>jn",
@@ -22,39 +21,28 @@ return {
           java_record = "<leader>jr",
         },
         templates = {
-          -- Puoi sovrascrivere i template predefiniti qui
-          -- Esempio per Spring Boot:
+          -- Esempio template personalizzato:
           -- class = [[package %s;
           --
-          -- import org.springframework.stereotype.*;
-          --
-          -- @Service
           -- public class %s {
-          --
+          --     private static final Logger log = LoggerFactory.getLogger(%s.class);
           -- }]],
         },
         default_imports = {
-          -- Puoi aggiungere import di default per tipo
-          class = {},
-          interface = {},
-          enum = {},
-          record = { "java.util.*" },
-          abstract_class = {},
+          record = { "java.util.*" }, -- Import di default per i record
         },
       })
 
-      -- Mappa extra per l'autocompletamento
-      vim.api.nvim_set_keymap("i", "<C-space>", 'pumvisible() ? "\\<C-n>" : "\\<C-x>\\<C-u>"', {
+      vim.keymap.set("i", "<C-space>", 'pumvisible() ? "\\<C-n>" : "\\<C-x>\\<C-u>"', {
         expr = true,
-        noremap = true,
-        desc = "Attiva completamento package Java",
+        desc = "",
       })
     end,
-    ft = "java", -- Carica solo per file Java
-    event = "VeryLazy", -- Carica quando NVIM è pronto
+    ft = "java",
+    event = "VeryLazy",
     dependencies = {
-      "nvim-telescope/telescope.nvim", -- Opzionale: per una migliore UI
-      "rcarriga/nvim-notify", -- Opzionale: per notifiche più belle
+      { "nvim-telescope/telescope.nvim", optional = true },
+      { "rcarriga/nvim-notify", optional = true },
     },
   },
 }

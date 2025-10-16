@@ -147,7 +147,7 @@
     "tooltip-format-ethernet": "{ifname} ",
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 50,
-    "on-click": "kitty nmtui"
+    "on-click": "nmgui"
   },
   "pulseaudio": {
     "format": "{icon}  {volume}%",
