@@ -5,13 +5,13 @@ icon=""
 sleep 1
 case $1 in
 previous)
-  button="  "
+  button=""
   ;;
 play)
-  button="  "
+  button=""
   ;;
 next)
-  button="  "
+  button=""
   ;;
 *)
   buttons="DIO"
@@ -41,7 +41,7 @@ if [[ -f "$XDG_RUNTIME_DIR/waybar-playerctl.info" ]]; then
     ;;
   esac
   printf '{"text":"%s","tooltip":"","class":""}\n' \
-    "$text" || break 2
+    "$text"
 else
   while [[ ! -f "$XDG_RUNTIME_DIR/waybar-playerctl.info" ]]; do
     sleep 1
