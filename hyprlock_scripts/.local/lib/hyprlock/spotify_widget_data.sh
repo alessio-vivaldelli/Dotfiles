@@ -11,10 +11,10 @@ if [[ -f "$XDG_RUNTIME_DIR/waybar-playerctl.info" ]]; then
   option=""
   case "$key" in
   title)
-    option=$title
+    option=" $title "
     ;;
   album)
-    option=$album
+    option=" $album "
     ;;
   icon)
     option=" $icon "
@@ -53,8 +53,11 @@ if [[ -f "$XDG_RUNTIME_DIR/waybar-playerctl.info" ]]; then
     ;;
   esac
 
-  option=${option:0:20}
-  echo '<span foreground='\"$text\"'>'$option'</span>'
+  if [ ${#option} -gt 20 ]; then
+    option="${option:0:17}..."
+  fi
+  echo '<span  foreground='"\"$text\""'>'"$option"'</span>'
+  # <span foreground='"\"$text\""'>'"$option"'</span>
 
 fi
 # echo $text

@@ -48,17 +48,17 @@ while true; do
 
     icon="󰗹"
     if [[ "$url" == *"spotify"* ]]; then
-      text='<span foreground=\"#a6e3a1\"> '" $line"'</span>'
+      text='<span size=\"16pt\" rise=\"-1600\" foreground=\"#a6e3a1\"></span><span foreground=\"#a6e3a1\">'" $line"'</span>'
       icon=""
     elif [[ "$url" == *"youtube"* ]]; then
       icon=""
-      text='<span foreground=\"#f38ba8\">  '" $line"'</span>'
+      text='<span size=\"16pt\" rise=\"-1600\" foreground=\"#f38ba8\"></span><span foreground=\"#f38ba8\">'" $line"'</span>'
     elif [[ "$url" == *"moodle"* ]]; then
-      text='<span foreground=\"#fab387\">  '" $line"'</span>'
+      text='<span size=\"16pt\" rise=\"-1600\" foreground=\"#fab387\"></span><span foreground=\"#fab387\">'" $line"'</span>'
       icon=""
     elif [[ "$url" == "" ]]; then
       if [[ "$title" == *"Prime Video"* ]]; then
-        text='<span foreground=\"#89dceb\">  '" $line"'</span>'
+        text='<span size=\"16pt\" rise=\"-1600\" foreground=\"#89dceb\"></span><span foreground=\"#89dceb\">'" $line"'</span>'
         icon=""
       else
         icon=""
